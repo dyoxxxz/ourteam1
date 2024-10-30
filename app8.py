@@ -7,7 +7,7 @@ from sklearn.metrics.pairwise import cosine_similarity
 if 'user_input' not in st.session_state:
     st.session_state.user_input = ""
 # Set page configuration
-st.set_page_config(page_title="포트폴리오 챗봇~", page_icon="🤖", layout="centered")
+st.set_page_config(page_title="포트폴리오 챗봇~^^", page_icon="🤖", layout="centered")
 
 # Custom CSS for green theme
 st.markdown("""
