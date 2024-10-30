@@ -97,6 +97,9 @@ def submit_callback():
 st.title("🤖 포트폴리오 챗봇")
 st.write("포트폴리오에 관한 질문을 입력해보세요. 예: 포트폴리오 주제가 무엇인가요?")
 
+# 이미지 표시
+st.image("heart2.png", caption="Welcome to the Portpolio Chatbot", use_column_width=True)
+
 # 폼 생성
 with st.form(key='chat_form'):
     st.text_input("질문을 입력하세요:", key='temp_input', value=st.session_state.user_input)
