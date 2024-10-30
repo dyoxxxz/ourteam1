@@ -95,7 +95,7 @@ def submit_callback():
 
 # Streamlit 인터페이스
 st.title("🤖 포트폴리오 챗봇")
-st.write("포트폴리오에 관한 질문을 입력해보세요. 예: 포트폴리오 주제가 무엇인가요?")
+st.write("포트폴리오에 관한 질문을 입력해보세요. 예: 포트폴리오 주제가 무엇인가요? 하하...")
 
 # 이미지 표시
 st.image("heart2.png", caption="Welcome to the Portpolio Chatbot", use_column_width=True)
