@@ -109,3 +109,23 @@ with st.form(key='chat_form'):
 for message in st.session_state.history:
     st.markdown(f"<div class='user-message'><b>사용자</b>: {message['user']}</div>", unsafe_allow_html=True)
     st.markdown(f"<div class='bot-message'><b>챗봇</b>: {message['bot']}</div>", unsafe_allow_html=True)
+
+# 음성 파일 재생 섹션 추가
+st.markdown("## 🎵 음성 파일 재생")
+audio_file = st.file_uploader("d://deep//latte.wav", type=['wav'])
+
+if audio_file is not None:
+    st.audio(audio_file, format='audio/wav')
+    st.success("음성 파일이 성공적으로 로드되었습니다!")
+
+# 저장된 음성 파일 재생 섹션
+st.markdown("## 💾 저장된 음성 파일 재생")
+saved_audio_files = ["latte.wav"]  # 실제 저장된 파일 이름으로 대체하세요
+selected_file = st.selectbox("재생할 음성 파일을 선택하세요:", saved_audio_files)
+
+if st.button("선택한 파일 재생"):
+    try:
+        st.audio(selected_file, format='audio/wav')
+        st.success(f"{selected_file} 파일이 성공적으로 재생되었습니다!")
+    except Exception as e:
+        st.error(f"파일을 재생하는 중 오류가 발생했습니다: {str(e)}")
