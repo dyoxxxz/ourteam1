@@ -69,7 +69,7 @@ answers = [
 ]
 
 # 질문에 맞는 오디오 파일 경로 매핑 (미리 준비된 파일)
-audio_files = {,
+audio_files = {
     "조장이 누구인가요": "d:/deep/latte.wav": 
 }
 
