@@ -128,11 +128,14 @@ with st.form(key='chat_form'):
 
 # 대화 이력 표시 (텍스트와 함께 음성 재생 추가)
 for message in st.session_state.history:
+    
+    # 사용자 메시지 출력
     st.markdown(f"<div class='user-message'><b>사용자</b>: {message['user']}</div>", unsafe_allow_html=True)
     
-    # 챗봇의 텍스트 응답 출력
-    st.markdown(f"<div class='bot-message'><b>챗봇</b>: {message['bot']}</div>", unsafe_allow_html=True)
-    
-    # 해당하는 오디오 파일이 있으면 재생 버튼 추가 (WAV 형식 대응)
+    # 해당하는 오디오 파일이 있으면 오디오만 재생하고 텍스트는 출력하지 않음
     if message["audio"]:
         st.audio(message["audio"], format="audio/wav")  # WAV 파일 재생
+    
+    # 오디오가 없으면 텍스트 응답 출력
+    else:
+        st.markdown(f"<div class='bot-message'><b>챗봇</b>: {message['bot']}</div>", unsafe_allow_html=True)
