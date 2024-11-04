@@ -97,7 +97,13 @@ def get_response(user_input):
     else:
         st.session_state.history.append({"user": user_input, "bot": answer['챗봇'], "audio": None})
 
-# (제출 콜백 함수는 그대로 유지)
+# 제출 콜백 함수
+def submit_callback():
+    user_input = st.session_state.temp_input
+    if user_input:
+        get_response(user_input)
+        # 입력 초기화
+        st.session_state.user_input = ""
 
 # Streamlit 인터페이스
 st.title("🤖 포트폴리오 챗봇")
