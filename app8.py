@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
+import os
 
 # 세션 상태 변수 초기화
 if 'user_input' not in st.session_state:
@@ -47,6 +48,10 @@ def load_model():
 
 encoder = load_model()
 
+# 오디오 파일 경로 설정
+AUDIO_DIR = "C:\\chat"
+AUDIO_FILE = "minji.wav"
+
 # 포트폴리오 관련 질문과 답변 데이터
 questions = [
     "포트폴리오 주제가 무엇인가요?",
@@ -70,42 +75,50 @@ answers = [
 @st.cache(allow_output_mutation=True)
 def create_dataframe():
     question_embeddings = encoder.encode(questions)
-    return pd.DataFrame({'question': questions, '챗봇': answers, 'embedding': list(question_embeddings)})
+    audio_paths = [os.path.join(AUDIO_DIR, AUDIO_FILE) if q == "힘든 점은 없었나요?" else None for q in questions]
+    return pd.DataFrame({
+        'question': questions, 
+        '챗봇': answers, 
+        'embedding': list(question_embeddings),
+        'audio': audio_paths
+    })
 
 df = create_dataframe()
-
-# 대화 이력을 저장하기 위한 Streamlit 상태 설정
-if 'history' not in st.session_state:
-    st.session_state.history = []
 
 # 챗봇 함수 정의
 def get_response(user_input):
     embedding = encoder.encode(user_input)
     df['distance'] = df['embedding'].map(lambda x: cosine_similarity([embedding], [x]).squeeze())
     answer = df.loc[df['distance'].idxmax()]
-    st.session_state.history.append({"user": user_input, "bot": answer['챗봇']})
+    audio_path = answer['audio']
+    
+    if audio_path and os.path.exists(audio_path):
+        st.session_state.history.append({"user": user_input, "bot": answer['챗봇'], "audio": audio_path})
+    else:
+        st.session_state.history.append({"user": user_input, "bot": answer['챗봇'], "audio": None})
 
-# 제출 콜백 함수
-def submit_callback():
-    user_input = st.session_state.temp_input
-    if user_input:
-        get_response(user_input)
-        # 입력 초기화
-        st.session_state.user_input = ""
+# (제출 콜백 함수는 그대로 유지)
 
 # Streamlit 인터페이스
 st.title("🤖 포트폴리오 챗봇")
 st.write("포트폴리오에 관한 질문을 입력해보세요. 예: 포트폴리오 주제가 무엇인가요? 하하...")
 
 # 이미지 표시
-st.image("heart2.png", caption="Welcome to the Portpolio Chatbot", use_column_width=True)
+st.image("heart2.png", caption="Welcome to the Portfolio Chatbot", use_column_width=True)
 
 # 폼 생성
 with st.form(key='chat_form'):
     st.text_input("질문을 입력하세요:", key='temp_input', value=st.session_state.user_input)
     submit_button = st.form_submit_button(label='제출', on_click=submit_callback)
 
-# 대화 이력 표시
+# 대화 이력 표시 및 오디오 재생
 for message in st.session_state.history:
     st.markdown(f"<div class='user-message'><b>사용자</b>: {message['user']}</div>", unsafe_allow_html=True)
     st.markdown(f"<div class='bot-message'><b>챗봇</b>: {message['bot']}</div>", unsafe_allow_html=True)
+    
+    # 음성 파일 재생 (힘든 점 질문에 대해서만)
+    if message.get('audio') and os.path.exists(message['audio']):
+        try:
+            st.audio(message['audio'], format="audio/wav")
+        except Exception as e:
+            st.error(f"오디오 파일을 재생할 수 없습니다: {str(e)}")
