@@ -2,12 +2,10 @@ import streamlit as st
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 from sklearn.metrics.pairwise import cosine_similarity
-import os
 
 # 세션 상태 변수 초기화
 if 'user_input' not in st.session_state:
     st.session_state.user_input = ""
-
 # Set page configuration
 st.set_page_config(page_title="포트폴리오 챗봇!", page_icon="🤖", layout="centered")
 
@@ -68,11 +66,6 @@ answers = [
     "텍스트를 원하는 음성으로 구현하는 것과 답변 자료 데이터셋을 확장시키는 것이 다소 어려웠지만 좋은 출력물을 낼 수 있었습니다."
 ]
 
-# 질문에 맞는 오디오 파일 경로 매핑 (미리 준비된 파일)
-audio_files = {
-    "조장이 누구인가요": "c:/chat/new_output6.wav"
-}
-
 # 질문 임베딩과 답변 데이터프레임 생성
 @st.cache(allow_output_mutation=True)
 def create_dataframe():
@@ -85,26 +78,12 @@ df = create_dataframe()
 if 'history' not in st.session_state:
     st.session_state.history = []
 
-# 챗봇 함수 정의 (답변 생성 및 오디오 파일 매칭)
+# 챗봇 함수 정의
 def get_response(user_input):
     embedding = encoder.encode(user_input)
-    
-    # 유사도 계산하여 가장 유사한 응답 찾기
     df['distance'] = df['embedding'].map(lambda x: cosine_similarity([embedding], [x]).squeeze())
-    
-    # 가장 유사한 질문의 답변 가져오기
-    answer_row = df.loc[df['distance'].idxmax()]
-    
-    # 챗봇의 텍스트 답변
-    answer_text = answer_row['챗봇']
-    
-    # 해당 질문에 맞는 오디오 파일 가져오기 (없으면 None)
-    question_text = answer_row['question']
-    
-    audio_file = audio_files.get(question_text, None)  # 질문에 맞는 오디오 파일 경로
-    
-    # 대화 이력에 추가 (텍스트와 오디오 파일 경로)
-    st.session_state.history.append({"user": user_input, "bot": answer_text, "audio": audio_file})
+    answer = df.loc[df['distance'].idxmax()]
+    st.session_state.history.append({"user": user_input, "bot": answer['챗봇']})
 
 # 제출 콜백 함수
 def submit_callback():
@@ -126,21 +105,7 @@ with st.form(key='chat_form'):
     st.text_input("질문을 입력하세요:", key='temp_input', value=st.session_state.user_input)
     submit_button = st.form_submit_button(label='제출', on_click=submit_callback)
 
-# 대화 이력 표시 및 오디오 재생 (이 부분을 폼 아래에 추가)
+# 대화 이력 표시
 for message in st.session_state.history:
     st.markdown(f"<div class='user-message'><b>사용자</b>: {message['user']}</div>", unsafe_allow_html=True)
     st.markdown(f"<div class='bot-message'><b>챗봇</b>: {message['bot']}</div>", unsafe_allow_html=True)
-    
-    if message["audio"] and os.path.exists(message["audio"]):
-        try:
-            st.audio(message["audio"], format="audio/wav")
-        except Exception as e:
-            logging.error(f"오디오 파일 재생 오류: {str(e)}")
-            st.error(f"오디오 파일을 재생할 수 없습니다: {str(e)}")
-    
-    # 챗봇의 텍스트 응답 출력
-    st.markdown(f"<div class='bot-message'><b>챗봇</b>: {message['bot']}</div>", unsafe_allow_html=True)
-    
-    # 해당하는 오디오 파일이 있으면 재생 버튼 추가 (WAV 형식 대응)
-    if message["audio"]:
-        st.audio(message["audio"], format="audio/wav")  # WAV 파일 재생
