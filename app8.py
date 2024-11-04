@@ -7,6 +7,10 @@ import os
 # 세션 상태 변수 초기화
 if 'user_input' not in st.session_state:
     st.session_state.user_input = ""
+
+if 'history' not in st.session_state:
+    st.session_state.history = []
+    
 # Set page configuration
 st.set_page_config(page_title="포트폴리오 챗봇!", page_icon="🤖", layout="centered")
 
@@ -123,7 +127,7 @@ for message in st.session_state.history:
     st.markdown(f"<div class='bot-message'><b>챗봇</b>: {message['bot']}</div>", unsafe_allow_html=True)
     
     # 음성 파일 재생 (힘든 점 질문에 대해서만)
-    if message.get('audio') and os.path.exists(message['audio']):
+    if 'audio' in message and message['audio'] and os.path.exists(message['audio']):
         try:
             st.audio(message['audio'], format="audio/wav")
         except Exception as e:
