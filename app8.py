@@ -126,9 +126,17 @@ with st.form(key='chat_form'):
     st.text_input("질문을 입력하세요:", key='temp_input', value=st.session_state.user_input)
     submit_button = st.form_submit_button(label='제출', on_click=submit_callback)
 
-# 대화 이력 표시 (텍스트와 함께 음성 재생 추가)
+# 대화 이력 표시 및 오디오 재생 (이 부분을 폼 아래에 추가)
 for message in st.session_state.history:
     st.markdown(f"<div class='user-message'><b>사용자</b>: {message['user']}</div>", unsafe_allow_html=True)
+    st.markdown(f"<div class='bot-message'><b>챗봇</b>: {message['bot']}</div>", unsafe_allow_html=True)
+    
+    if message["audio"] and os.path.exists(message["audio"]):
+        try:
+            st.audio(message["audio"], format="audio/wav")
+        except Exception as e:
+            logging.error(f"오디오 파일 재생 오류: {str(e)}")
+            st.error(f"오디오 파일을 재생할 수 없습니다: {str(e)}")
     
     # 챗봇의 텍스트 응답 출력
     st.markdown(f"<div class='bot-message'><b>챗봇</b>: {message['bot']}</div>", unsafe_allow_html=True)
